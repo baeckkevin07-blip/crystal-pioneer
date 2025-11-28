@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pharmacy {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  phone     String?
+  address   String?
+  notes     String?   // Notes internes pour l'admin
+  status    String    @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  consents  Consent[]
+  tags      Tag[]     // Relation Many-to-Many implicite
+}
+
+model Tag {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  color       String     @default("#43B2B3") // Couleur par défaut (Turquoise iDklic)
+  pharmacies  Pharmacy[]
+}
+
+model Campaign {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  month       String    // Format YYYY-MM
+  status      String    @default("DRAFT") // DRAFT, ACTIVE, COMPLETED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  consents    Consent[]
+}
+
+model Consent {
+  id          String    @id @default(uuid())
+  campaignId  String
+  pharmacyId  String
+  status      String    @default("PENDING") // PENDING, ACCEPTED, DECLINED
+  token       String    @unique // Token unique pour le lien d'accès
+  comment     String?   // Commentaire optionnel de la pharmacie
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  pharmacy    Pharmacy  @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, pharmacyId])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
