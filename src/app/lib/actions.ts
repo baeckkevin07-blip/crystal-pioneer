@@ -8,7 +8,9 @@ export async function authenticate(
     formData: FormData,
 ) {
     try {
-        await signIn('credentials', formData)
+        console.log('Authenticate action called with formData:', Object.fromEntries(formData));
+        const result = await signIn('credentials', formData)
+        console.log('SignIn result:', result);
     } catch (error) {
         if (error instanceof Error) {
             // NextAuth throws a redirect error on success, which we must rethrow

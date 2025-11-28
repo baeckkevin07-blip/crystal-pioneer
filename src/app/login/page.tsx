@@ -56,7 +56,7 @@ export default function LoginPage() {
 function LoginButton() {
     const { pending } = useFormStatus()
     return (
-        <Button className="w-full bg-[#43B2B3] hover:bg-[#3AA2A3]" disabled={pending}>
+        <Button type="submit" className="w-full bg-[#43B2B3] hover:bg-[#3AA2A3]" disabled={pending}>
             {pending ? 'Connexion...' : 'Se connecter'}
         </Button>
     )
