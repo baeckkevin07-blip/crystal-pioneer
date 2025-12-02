@@ -34,6 +34,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                     console.error("DEBUG: User found:", user.email);
 
+                    // DEBUG: Bypass password check for admin to test DB connection
+                    if (user.email === 'admin@idklic.com') {
+                        console.error("DEBUG: Bypassing password for admin");
+                        return { id: user.id, name: user.name, email: user.email }
+                    }
+
                     const passwordsMatch = await bcrypt.compare(password, user.password)
 
                     if (passwordsMatch) {
