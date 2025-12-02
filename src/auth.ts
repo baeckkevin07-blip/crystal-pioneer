@@ -13,11 +13,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                console.error("DEBUG: Authorize called for:", credentials?.email);
-                if (!credentials?.email || !credentials?.password) {
-                    console.error("DEBUG: Missing credentials");
-                    return null
-                }
+                if (!credentials?.email || !credentials?.password) return null
 
                 const email = credentials.email as string
                 const password = credentials.password as string
@@ -27,29 +23,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                         where: { email }
                     })
 
-                    if (!user) {
-                        console.error("DEBUG: User not found in DB");
-                        return null
-                    }
-
-                    console.error("DEBUG: User found:", user.email);
-
-                    // DEBUG: Bypass password check for admin to test DB connection
-                    if (user.email === 'admin@idklic.com') {
-                        console.error("DEBUG: Bypassing password for admin");
-                        return { id: user.id, name: user.name, email: user.email }
-                    }
+                    if (!user) return null
 
                     const passwordsMatch = await bcrypt.compare(password, user.password)
 
                     if (passwordsMatch) {
-                        console.error("DEBUG: Password match success");
                         return { id: user.id, name: user.name, email: user.email }
-                    } else {
-                        console.error("DEBUG: Password match failed");
                     }
                 } catch (e) {
-                    console.error("DEBUG: Error in authorize:", e);
+                    console.error("Auth error:", e);
                 }
 
                 return null
