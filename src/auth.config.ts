@@ -3,7 +3,7 @@ export const authConfig = {
         signIn: '/login',
     },
     callbacks: {
-        authorized({ auth, request: { nextUrl } }) {
+        authorized({ auth, request: { nextUrl } }: any) {
             const isLoggedIn = !!auth?.user
             const isOnAdmin = nextUrl.pathname.startsWith('/admin')
 
