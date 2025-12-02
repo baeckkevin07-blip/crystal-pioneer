@@ -13,9 +13,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                console.log("Authorize called for:", credentials?.email);
+                console.error("DEBUG: Authorize called for:", credentials?.email);
                 if (!credentials?.email || !credentials?.password) {
-                    console.log("Missing credentials");
+                    console.error("DEBUG: Missing credentials");
                     return null
                 }
 
@@ -28,22 +28,22 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     })
 
                     if (!user) {
-                        console.log("User not found in DB");
+                        console.error("DEBUG: User not found in DB");
                         return null
                     }
 
-                    console.log("User found:", user.email);
+                    console.error("DEBUG: User found:", user.email);
 
                     const passwordsMatch = await bcrypt.compare(password, user.password)
 
                     if (passwordsMatch) {
-                        console.log("Password match success");
+                        console.error("DEBUG: Password match success");
                         return { id: user.id, name: user.name, email: user.email }
                     } else {
-                        console.log("Password match failed");
+                        console.error("DEBUG: Password match failed");
                     }
                 } catch (e) {
-                    console.error("Error in authorize:", e);
+                    console.error("DEBUG: Error in authorize:", e);
                 }
 
                 return null
