@@ -1,34 +1,49 @@
 'use server'
 
 import { signIn } from '@/auth'
-
+import { redirect } from 'next/navigation'
 
 export async function authenticate(
     prevState: string | undefined,
     formData: FormData,
 ) {
     try {
-        console.log('Authenticate action called with formData:', Object.fromEntries(formData));
-        const result = await signIn('credentials', formData)
-        console.log('SignIn result:', result);
-    } catch (error) {
-        if (error instanceof Error) {
-            // NextAuth throws a redirect error on success, which we must rethrow
-            if (error.message.includes('NEXT_REDIRECT')) {
-                throw error;
-            }
+        const email = formData.get('email')
+        const password = formData.get('password')
 
+        try {
+            await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            })
+        } catch (err) {
+            if (err instanceof Error && err.message.includes('CredentialsSignin')) {
+                return 'Identifiants invalides.'
+            }
+            // If it's a redirect error, ignore it and return success
+            if (isRedirectError(err)) {
+                return 'success'
+            }
+            throw err;
+        }
+
+        return 'success'
+    } catch (error) {
+        // If it's a redirect error, ignore it and return success
+        if (isRedirectError(error)) {
+            return 'success'
+        }
+
+        console.error('Login error:', error);
+
+        if (error instanceof Error) {
             if (error.message.includes('CredentialsSignin')) {
                 return 'Identifiants invalides.'
             }
         }
 
-        // If it's a redirect error (which might not be an instance of Error in some cases/versions), rethrow it
-        if (isRedirectError(error)) {
-            throw error;
-        }
-
-        return "Une erreur s'est produite."
+        return "Erreur: " + (error instanceof Error ? error.message : String(error))
     }
 }
 
