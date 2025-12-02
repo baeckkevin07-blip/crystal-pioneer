@@ -1,55 +1,27 @@
 'use server'
 
 import { signIn } from '@/auth'
-import { redirect } from 'next/navigation'
 
 export async function authenticate(
     prevState: string | undefined,
     formData: FormData,
 ) {
     try {
-        const email = formData.get('email')
-        const password = formData.get('password')
-
-        try {
-            await signIn('credentials', {
-                email,
-                password,
-                redirect: false,
-            })
-        } catch (err) {
-            if (err instanceof Error && err.message.includes('CredentialsSignin')) {
-                return 'Identifiants invalides.'
-            }
-            // If it's a redirect error, ignore it and return success
-            if (isRedirectError(err)) {
-                return 'success'
-            }
-            throw err;
-        }
-
-        return 'success'
+        await signIn('credentials', {
+            email: formData.get('email'),
+            password: formData.get('password'),
+            redirectTo: '/admin/dashboard',
+        })
     } catch (error) {
-        // If it's a redirect error, ignore it and return success
-        if (isRedirectError(error)) {
-            return 'success'
-        }
-
-        console.error('Login error:', error);
-
         if (error instanceof Error) {
             if (error.message.includes('CredentialsSignin')) {
                 return 'Identifiants invalides.'
             }
         }
 
-        return "Une erreur s'est produite."
+        // AuthJS throws a redirect error when successful - this is expected behavior
+        throw error
     }
-}
 
-function isRedirectError(error: any) {
-    return error && typeof error === 'object' && (
-        error.digest?.startsWith('NEXT_REDIRECT') ||
-        error.message?.includes('NEXT_REDIRECT')
-    );
+    return 'Identifiants invalides.'
 }
