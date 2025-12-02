@@ -43,7 +43,7 @@ export async function authenticate(
             }
         }
 
-        return "Erreur: " + (error instanceof Error ? error.message : String(error))
+        return "Une erreur s'est produite."
     }
 }
 
