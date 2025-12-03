@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import prisma from "@/lib/prisma"
 import DashboardCharts from "@/components/dashboard-charts"
 
+// Désactiver le cache pour avoir des stats en temps réel
+export const revalidate = 0
+
 async function getAnalytics() {
   const pharmacyCount = await prisma.pharmacy.count()
   const activeCampaigns = await prisma.campaign.count({
