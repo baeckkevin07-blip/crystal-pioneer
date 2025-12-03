@@ -26,7 +26,7 @@ async function getCampaign(id: string) {
 
 import AddPharmacyForm from "@/components/add-pharmacy-form"
 import DeleteCampaignButton from "@/components/delete-campaign-button"
-import BulkPharmacySelector from "@/components/bulk-pharmacy-selector"
+import SimpleBulkSelector from "@/components/simple-bulk-selector"
 
 async function getAvailablePharmacies(campaignId: string) {
     const pharmacies = await prisma.pharmacy.findMany({
@@ -72,7 +72,7 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
 
                     <AddPharmacyForm campaignId={campaign.id} pharmacies={availablePharmacies} />
 
-                    <BulkPharmacySelector campaignId={campaign.id} availablePharmacies={availablePharmacies} />
+                    <SimpleBulkSelector campaignId={campaign.id} availablePharmacies={availablePharmacies} />
 
                     <form action={async () => {
                         'use server'
