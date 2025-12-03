@@ -19,7 +19,7 @@ export async function sendConsentEmail(data: ConsentEmailData) {
 
   try {
     const { data: result, error } = await resend.emails.send({
-      from: 'PharmaConsent <onboarding@resend.dev>',
+      from: 'iDklic Campagnes <marketing@idklic.com>',
       to: [data.pharmacyEmail],
       subject: `🏥 Participation - ${data.campaignName}`,
       html: getEmailTemplate(data),
