@@ -80,3 +80,60 @@ export async function createCampaign(formData: FormData) {
         return { error: 'Une erreur est survenue' }
     }
 }
+
+export async function sendBulkConsentRequests(campaignId: string, pharmacyIds: string[]) {
+    if (pharmacyIds.length === 0) {
+        return { success: false, error: 'Aucune pharmacie sélectionnée' }
+    }
+
+    let count = 0
+    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } })
+
+    if (!campaign) {
+        return { success: false, error: 'Campagne introuvable' }
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
+    for (const pharmacyId of pharmacyIds) {
+        const pharmacy = await prisma.pharmacy.findUnique({ where: { id: pharmacyId } })
+        if (!pharmacy) continue
+
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+
+        try {
+            await prisma.consent.create({
+                data: {
+                    campaignId,
+                    pharmacyId: pharmacy.id,
+                    token,
+                    status: 'PENDING'
+                }
+            })
+            count++
+
+            // Send actual email
+            const { sendConsentEmail } = await import('@/lib/email')
+            await sendConsentEmail({
+                pharmacyName: pharmacy.name,
+                pharmacyEmail: pharmacy.email,
+                campaignName: campaign.name,
+                campaignDescription: campaign.description || '',
+                consentLink: `${baseUrl}/consent/${token}`
+            })
+        } catch (_e) {
+            // Ignore duplicates
+        }
+    }
+
+    // Update campaign status if it was DRAFT
+    if (campaign.status === 'DRAFT') {
+        await prisma.campaign.update({
+            where: { id: campaignId },
+            data: { status: 'ACTIVE' }
+        })
+    }
+
+    revalidatePath(`/admin/campaigns/${campaignId}`)
+    return { success: true, count }
+}
